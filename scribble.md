@@ -81,3 +81,29 @@ modelName: "user",
 In here the first object we created holds all the columns and defines each one one at a time giving the sequelize syntax so it can talk to mySQL and create the parameters for these columns. The second object configures certain options for the entire table.
 
 Lastly we export the user with madule.exports = User; and went and made an index.js in the models folder that requires this User.js and then uses module.exports = {User}; to future proof the app so we can be ready for multiple exports.
+
+# 13.1.6
+
+Pretty big page. The gist is we added the get all, get by id, post, put and delete to the user-routes.js. Then we created an index.js in the routes/api folder, then we created another index in the routes folder. Each of these talk to each other and append to the URL in order.
+
+## Finally we got our server,js up and running like this.
+
+const express = require('express');
+const routes = require('./routes');
+const sequelize = require('./config/connection');
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// turn on routes
+app.use(routes);
+
+// turn on connection to db and server
+sequelize.sync({ force: false }).then(() => {
+app.listen(PORT, () => console.log('Now listening'));
+});
+--.
+We required the routes folder which will work because of the two index files which serve as a hub to talk to everything. Then we used app.use(routes); to turn them on. Then we started the sequalize at the bottom and are using force false for now. It claimed that if it was true it would drop and create the db each time we load and that this will counter that.
