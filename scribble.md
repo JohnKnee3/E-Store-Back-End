@@ -107,3 +107,7 @@ app.listen(PORT, () => console.log('Now listening'));
 });
 --.
 We required the routes folder which will work because of the two index files which serve as a hub to talk to everything. Then we used app.use(routes); to turn them on. Then we started the sequalize at the bottom and are using force false for now. It claimed that if it was true it would drop and create the db each time we load and that this will counter that.
+
+# 13.2.4
+
+We downloaded bcrypt to protect our passwords using npm install bcrypt and requiring at the top of the User.js file that creates the rules for the User table. We are also planning on adding async to this because running this package is intensive and could take time, making it asynchronous will allow the function to continue while the bcrypt hash does it's thing.
