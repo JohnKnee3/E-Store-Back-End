@@ -111,3 +111,44 @@ We required the routes folder which will work because of the two index files whi
 # 13.2.4
 
 We downloaded bcrypt to protect our passwords using npm install bcrypt and requiring at the top of the User.js file that creates the rules for the User table. We are also planning on adding async to this because running this package is intensive and could take time, making it asynchronous will allow the function to continue while the bcrypt hash does it's thing.
+
+# 13.2.5
+
+Added code to the second object in the User,js which controls the table settings to wait for the passwords to hash out the brcypt when we create an account and when we update the account.
+
+## The added hooks looks like this in the second object
+
+{
+hooks: {
+// set up beforeCreate lifecycle "hook" functionality
+async beforeCreate(newUserData) {
+newUserData.password = await bcrypt.hash(newUserData.password, 10);
+return newUserData;
+},
+// set up beforeUpdate lifecycle "hook" functionality
+async beforeUpdate(updatedUserData) {
+updatedUserData.password = await bcrypt.hash(
+updatedUserData.password,
+10
+);
+return updatedUserData;
+},
+},
+sequelize,
+timestamps: false,
+freezeTableName: true,
+underscored: true,
+modelName: "user",
+}
+--.
+
+Finally we had to slide into the user-routes.js and tweak with the put. The create was fine but in the put we needed to add a line
+
+## just before the where in the put.
+
+User.update(req.body, {
+individualHooks: true,
+where: {
+id: req.params.id,
+},
+})
