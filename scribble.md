@@ -152,3 +152,46 @@ where: {
 id: req.params.id,
 },
 })
+
+# 13.2.6
+
+Created the post that verifies the user name and password.
+
+## In user-routes.js it looks like this
+
+router.post("/login", (req, res) => {
+// expects {email: 'lernantino@gmail.com', password: 'password1234'}
+User.findOne({
+where: {
+email: req.body.email,
+},
+}).then((dbUserData) => {
+if (!dbUserData) {
+res.status(400).json({ message: "No user with that email address!" });
+return;
+}
+
+    const validPassword = dbUserData.checkPassword(req.body.password);
+    if (!validPassword) {
+      res.status(400).json({ message: "Incorrect password!" });
+      return;
+    }
+
+    res.json({ user: dbUserData, message: "You are now logged in!" });
+
+});
+});
+--.
+First we set up the URL to perform a post with /login. Afterwards we use teh sequelize findOne to look things up by email this time. If it finds a matching email address everything is fine and just to the checkPassword function that passes in the current password.
+
+## This function is on the User.js page and looks like this
+
+class User extends Model {
+// set up method to run on instance data (per user) to check password
+checkPassword(loginPw) {
+return bcrypt.compareSync(loginPw, this.password);
+}
+}
+--.
+
+Then over here bycrypt will work it's magic to compare the typed in plain text password to it's post hashed password. If it matched it sends back a true and you are good to log in.
