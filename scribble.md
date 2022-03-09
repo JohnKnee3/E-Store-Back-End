@@ -384,3 +384,44 @@ foreignKey: "post_id",
 });
 --.
 This is some pretty important stuff that I may have to reread for the challenge.
+
+# 13.4.4
+
+We learned how to add an upvote through the PUT method. First reference the vote table by user_id and post_id and make sure the first two values insert match. The first being who is voting and the second being what is voted on. Then we go into the Post table and pull out info to display. The weird guy at the end had to be written in raw SQL because we are counting the Vote table and not the Post table which apparently sequelize does not know how to do. The raw code simply counts how many different users have voted on this specific post.
+
+## The code looks like this
+
+router.put("/upvote", (req, res) => {
+// create the vote
+Vote.create({
+user_id: req.body.user_id,
+post_id: req.body.post_id,
+}).then(() => {
+// then find the post we just voted on
+return Post.findOne({
+where: {
+id: req.body.post_id,
+},
+attributes: [
+"id",
+"post_url",
+"title",
+"created_at",
+// use raw MySQL aggregate function query to get a count of how many votes the post has and return it under the name `vote_count`
+[
+sequelize.literal(
+"(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)"
+),
+"vote_count",
+],
+],
+})
+.then((dbPostData) => res.json(dbPostData))
+.catch((err) => {
+console.log(err);
+res.status(400).json(err);
+});
+});
+});
+--.
+the "vote_count" means that is what the number of votes is named when displayed.
