@@ -314,3 +314,73 @@ res.status(500).json(err);
 --.
 
 We needed the include object so it new how to go to the USER model and get the the info from the username column.
+
+# 13.4.3
+
+Created the vote table model. This time we had to include both user_id and the post_id since this will be talking to both tables.
+
+## Talking to both tables looks like this.
+
+Vote.init(
+{
+id: {
+type: DataTypes.INTEGER,
+primaryKey: true,
+autoIncrement: true,
+},
+user_id: {
+type: DataTypes.INTEGER,
+allowNull: false,
+references: {
+model: "user",
+key: "id",
+},
+},
+post_id: {
+type: DataTypes.INTEGER,
+allowNull: false,
+references: {
+model: "post",
+key: "id",
+},
+},
+},
+--.
+
+Then in the index.js we had to add several associations to get this to work.
+
+## The first one we created
+
+User.belongsToMany(Post, {
+through: Vote,
+as: 'voted_posts',
+foreignKey: 'user_id'
+});
+
+Post.belongsToMany(User, {
+through: Vote,
+as: 'voted_posts',
+foreignKey: 'post_id'
+});
+--.
+Here we link both Post and User through the Vote's table. we display the info as voted posts and use the fk we set up in the vote table for each one. This lets us see which Users voted on a single post or which posts a single user voted on.
+
+## Finally we set up some one to many relationships like this
+
+Vote.belongsTo(User, {
+foreignKey: "user_id",
+});
+
+Vote.belongsTo(Post, {
+foreignKey: "post_id",
+});
+
+User.hasMany(Vote, {
+foreignKey: "user_id",
+});
+
+Post.hasMany(Vote, {
+foreignKey: "post_id",
+});
+--.
+This is some pretty important stuff that I may have to reread for the challenge.
