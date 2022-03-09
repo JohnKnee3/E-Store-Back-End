@@ -257,3 +257,60 @@ foreignKey: "user_id",
 --.
 
 This reads pretty well but to sum it up it says that the User table can have multiple post tables associated with it. Then we in and let it know that Post can only belong to ONE user. Both times we reference the fk which is user_id.
+
+# 13.3.6
+
+Added the post GET All, GET by id, POST, PUT and the DELETE. This one is pretty dense but walks you through the syntax that we have mostly seen before.
+
+## One thing that juked me was the PUT looked like this.
+
+router.put("/:id", (req, res) => {
+Post.update(
+{
+title: req.body.title,
+},
+{
+where: {
+id: req.params.id,
+},
+}
+)
+.then((dbPostData) => {
+if (!dbPostData[0]) {
+res.status(404).json({ message: "No post found with this id" });
+return;
+}
+res.json(dbPostData);
+})
+.catch((err) => {
+console.log(err);
+res.status(500).json(err);
+});
+});
+--.
+
+We needed to reference the title before the where. Everything else pretty much was a copy paste of the User routes.
+
+## Also the GET looked like this.
+
+// get all posts
+router.get("/", (req, res) => {
+Post.findAll({
+attributes: ["id", "post_url", "title", "created_at"],
+order: [["created_at", "DESC"]],
+include: [
+{
+model: User,
+attributes: ["username"],
+},
+],
+})
+.then((dbPostData) => res.json(dbPostData))
+.catch((err) => {
+console.log(err);
+res.status(500).json(err);
+});
+});
+--.
+
+We needed the include object so it new how to go to the USER model and get the the info from the username column.
