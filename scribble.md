@@ -195,3 +195,47 @@ return bcrypt.compareSync(loginPw, this.password);
 --.
 
 Then over here bycrypt will work it's magic to compare the typed in plain text password to it's post hashed password. If it matched it sends back a true and you are good to log in.
+
+# 13.3.4
+
+Created the Post table in the Post.js file in the Models folder. Then we went into the index.js in the models folder and required and exported it. The main new thing about this post table is that it uses a foreign key that references the User table .
+
+## The code for the table looks like this.
+
+Post.init(
+{
+id: {
+type: DataTypes.INTEGER,
+allowNull: false,
+primaryKey: true,
+autoIncrement: true,
+},
+title: {
+type: DataTypes.STRING,
+allowNull: false,
+},
+post_url: {
+type: DataTypes.STRING,
+allowNull: false,
+validate: {
+isURL: true,
+},
+},
+user_id: {
+type: DataTypes.INTEGER,
+references: {
+model: "user",
+key: "id",
+},
+},
+},
+{
+sequelize,
+freezeTableName: true,
+underscored: true,
+modelName: "post",
+}
+);
+--.
+
+Here we have the new guy user_id that is using the references:. Within that it targets the table by referencing model by with the table's name of user. Finally we use the key: which both simultaneously is our foreign key and references their primary key, we also target it by calling the foreign key by it's name of id as it is named in the User's table.
