@@ -425,3 +425,58 @@ res.status(400).json(err);
 });
 --.
 the "vote_count" means that is what the number of votes is named when displayed.
+
+# 13.4.5
+
+We updated the get routes in both post-routes.js and user-routes.js. We simply added the sequelize literal to the end of the attibutes in both of the GET routes in post-routes.js
+
+## post-routes.js GET example
+
+router.get("/", (req, res) => {
+Post.findAll({
+attributes: [
+"id",
+"post_url",
+"title",
+"created_at",
+[
+sequelize.literal(
+"(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)"
+),
+"vote_count",
+],
+],
+order: [["created_at", "DESC"]],
+include: [
+{
+model: User,
+attributes: ["username"],
+},
+],
+})
+--.
+
+Then in the user-routes we had to use include this time and used the
+
+## "through" for the first time.
+
+router.get("/:id", (req, res) => {
+User.findOne({
+attributes: { exclude: ["password"] },
+where: {
+id: req.params.id,
+},
+include: [
+{
+model: Post,
+attributes: ["id", "title", "post_url", "created_at"],
+},
+{
+model: Post,
+attributes: ["title"],
+through: Vote,
+as: "voted_posts",
+},
+],
+})
+--.
