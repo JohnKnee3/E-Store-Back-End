@@ -239,3 +239,21 @@ modelName: "post",
 --.
 
 Here we have the new guy user_id that is using the references:. Within that it targets the table by referencing model by with the table's name of user. Finally we use the key: which both simultaneously is our foreign key and references their primary key, we also target it by calling the foreign key by it's name of id as it is named in the User's table.
+
+# 13.3.5
+
+Went into the models index.js and had to define the relationship between the Post and User table so sequelize can undertand it.
+
+## The code to define their relationship looked like this.
+
+// create associations
+User.hasMany(Post, {
+foreignKey: "user_id",
+});
+
+Post.belongsTo(User, {
+foreignKey: "user_id",
+});
+--.
+
+This reads pretty well but to sum it up it says that the User table can have multiple post tables associated with it. Then we in and let it know that Post can only belong to ONE user. Both times we reference the fk which is user_id.
