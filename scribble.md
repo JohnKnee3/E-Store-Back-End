@@ -480,3 +480,52 @@ as: "voted_posts",
 ],
 })
 --.
+
+# 13.4.6
+
+Moved all the code that added the vote to the Post.js table up at the class near the top.
+
+## Post.js class look like this
+
+class Post extends Model {
+static upvote(body, models) {
+return models.Vote.create({
+user_id: body.user_id,
+post_id: body.post_id,
+}).then(() => {
+return Post.findOne({
+where: {
+id: body.post_id,
+},
+attributes: [
+"id",
+"post_url",
+"title",
+"created_at",
+[
+sequelize.literal(
+"(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)"
+),
+"vote_count",
+],
+],
+});
+});
+}
+}
+--.
+
+## Finally we went and cleaned up the code from post-routes.js
+
+/ PUT /api/posts/upvote
+router.put("/upvote", (req, res) => {
+// custom static method created in models/Post.js
+Post.upvote(req.body, { Vote })
+.then((updatedPostData) => res.json(updatedPostData))
+.catch((err) => {
+console.log(err);
+res.status(400).json(err);
+});
+});
+--.
+To call this new function we created. Here we call the upvote function and pass in the body from the request and the {Vote} model. Since we never had to call it Vote in Post.js we never had to require it up top.
