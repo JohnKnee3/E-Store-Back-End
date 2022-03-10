@@ -529,3 +529,27 @@ res.status(400).json(err);
 });
 --.
 To call this new function we created. Here we call the upvote function and pass in the body from the request and the {Vote} model. Since we never had to call it Vote in Post.js we never had to require it up top.
+
+# 13.5.3
+
+We wet up the comment table using all existing code we have seen before and were encouraged to do this on our own. I didn't get any errors so this SHOULD be fine.... Then we went into index.js and set up the associations that both the POST and USER table have with the COMMENT table.
+
+## It looked like this.
+
+Comment.belongsTo(User, {
+foreignKey: "user_id",
+});
+
+Comment.belongsTo(Post, {
+foreignKey: "post_id",
+});
+
+User.hasMany(Comment, {
+foreignKey: "user_id",
+});
+
+Post.hasMany(Comment, {
+foreignKey: "post_id",
+});
+--.
+The top 2 basically say when you check User or Post you will beable to check any comment tied to them while the second grouping allows you to see multiple comments tied to them.
