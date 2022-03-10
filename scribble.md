@@ -738,3 +738,35 @@ attributes: ["username"],
 })
 
 It looks a little silly but this will grab every comment. Then it will create a user name associated with that post and then it will also show every post by title that this user has ever made.
+
+# 13.5.6
+
+Learned how to add the JawsDb to the heroku page. It'll be best to just come back to this page when relevant. We had to change some code in connection.js to make Heroku happy.
+
+## This
+
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PW, {
+host: 'localhost',
+dialect: 'mysql',
+port: 3306
+});
+--.
+
+## Turned into this
+
+let sequelize;
+
+if (process.env.JAWSDB_URL) {
+sequelize = new Sequelize(process.env.JAWSDB_URL);
+} else {
+sequelize = new Sequelize(
+process.env.DB_NAME,
+process.env.DB_USER,
+process.env.DB_PW,
+{
+host: "localhost",
+dialect: "mysql",
+port: 3306,
+}
+);
+}
