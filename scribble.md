@@ -553,3 +553,52 @@ foreignKey: "post_id",
 });
 --.
 The top 2 basically say when you check User or Post you will beable to check any comment tied to them while the second grouping allows you to see multiple comments tied to them.
+
+# 13.5.4
+
+Set up the GET, POST and DELETE for sequelize in the comment-routes.js. Nothing really new here that hasn't been used in previous code.
+
+## Here is an example of the code
+
+router.get("/", (req, res) => {
+Comment.findAll()
+.then((dbCommentData) => res.json(dbCommentData))
+.catch((err) => {
+console.log(err);
+res.status(500).json(err);
+});
+});
+
+router.post("/", (req, res) => {
+Comment.create({
+comment_text: req.body.comment_text,
+post_id: req.body.post_id,
+user_id: req.body.user_id,
+})
+.then((dbCommentData) => res.json(dbCommentData))
+.catch((err) => {
+console.log(err);
+res.status(400).json(err);
+});
+});
+
+router.delete("/:id", (req, res) => {
+Comment.destroy({
+where: {
+id: req.params.id,
+},
+})
+.then((dbCommentData) => {
+if (!dbCommentData) {
+res.status(404).json({ message: "No comment found with this id" });
+return;
+}
+res.json(dbCommentData);
+})
+.catch((err) => {
+console.log(err);
+res.status(500).json(err);
+});
+});
+--.  
+I was basically able to copy and paste from the previous routes and just had to make sure everything was named properly as is usually the error that occurs when you eat copy pasta.
