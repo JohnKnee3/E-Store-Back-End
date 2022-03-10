@@ -602,3 +602,139 @@ res.status(500).json(err);
 });
 --.  
 I was basically able to copy and paste from the previous routes and just had to make sure everything was named properly as is usually the error that occurs when you eat copy pasta.
+
+# 13.5.5
+
+We added the Comment model to existing GETs.
+
+## In the user-routes GET ALL we added
+
+router.get("/", (req, res) => {
+console.log("======================");
+Post.findAll({
+order: [["created_at", "DESC"]],
+attributes: [
+"id",
+"post_url",
+"title",
+"created_at",
+[
+sequelize.literal(
+"(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)"
+),
+"vote_count",
+],
+],
+include: [
+// include the Comment model here:
+{
+model: Comment,
+attributes: ["id", "comment_text", "post_id", "user_id", "created_at"],
+include: {
+model: User,
+attributes: ["username"],
+},
+},
+{
+model: User,
+attributes: ["username"],
+},
+],
+})
+--.  
+This makes sure that when you look at all posts it also pulls up all of their comments.
+
+## Next we added this same code to the post's find one
+
+router.get("/:id", (req, res) => {
+Post.findOne({
+where: {
+id: req.params.id,
+},
+attributes: [
+"id",
+"post_url",
+"title",
+"created_at",
+[
+sequelize.literal(
+"(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)"
+),
+"vote_count",
+],
+],
+include: [
+// include the Comment model here:
+{
+model: Comment,
+attributes: ["id", "comment_text", "post_id", "user_id", "created_at"],
+include: {
+model: User,
+attributes: ["username"],
+},
+},
+{
+model: User,
+attributes: ["username"],
+},
+],
+})
+--.
+This will pull up one post by id a make sure to display all comments attached to that specific post.
+
+## Finally we did the same thing in user-routes.js for then we find one user.
+
+router.get("/:id", (req, res) => {
+User.findOne({
+attributes: { exclude: ["password"] },
+where: {
+id: req.params.id,
+},
+include: [
+{
+model: Post,
+attributes: ["id", "title", "post_url", "created_at"],
+},
+{
+model: Comment,
+attributes: ["id", "comment_text", "post_id", "user_id", "created_at"],
+include: {
+model: User,
+attributes: ["username"],
+},
+},
+{
+model: Post,
+attributes: ["title"],
+through: Vote,
+as: "voted_posts",
+},
+],
+})
+--.
+This makes it so when you pull up as user by it's id it will also grab all of it's comments. I also discovered if you want to reference multiple tables in the same include the syntax must look something like this.
+
+## Multiple Tables
+
+include: [
+// include the Comment model here:
+{
+model: Comment,
+attributes: ["id", "comment_text", "post_id", "user_id", "created_at"],
+include: {
+model: User,
+attributes: ["username"],
+include: {
+model: Post,
+attributes: ["title"],
+},
+},
+},
+{
+model: User,
+attributes: ["username"],
+},
+],
+})
+
+It looks a little silly but this will grab every comment. Then it will create a user name associated with that post and then it will also show every post by title that this user has ever made.
